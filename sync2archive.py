@@ -51,6 +51,7 @@ for f in files:
         archive_path = Path(archive_folder, f.name)
 
         count_moved_files(folder_name)
+        
         print(f"Move {f} to {archive_path}")
 
         if args.force:
