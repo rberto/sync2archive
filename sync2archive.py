@@ -3,6 +3,18 @@ import argparse
 from PIL import Image, ExifTags, UnidentifiedImageError
 from datetime import datetime, timezone
 from dateutil.parser import parse
+from datetime import timedelta
+import pendulum
+
+d = timedelta(weeks=4)
+
+archive_limit = pendulum.instance(datetime.now() - d)
+print(archive_limit)
+
+def is_file_archivable(file, date):
+    print(f"{date} < {archive_limit}")
+    return date < archive_limit
+        
 
 parser = argparse.ArgumentParser(
                     prog='Sync2Archive',
@@ -21,10 +33,16 @@ for f in files:
     try:
         img = Image.open(f)
         datestr = str(img._getexif()[ExifTags.Base.DateTime])
-        date = parse(datestr)
     except UnidentifiedImageError as e:
-        print(f"Could not open file {f}: {e}")
+        print(f"{e}")
+        continue
     except (TypeError, KeyError) as e:
         print(f"Could not read exif of {f}: {e}")
+        continue
 
+    date = pendulum.parse(datestr)
+    #print(f"{date}    {datestr}")
     
+    print(f"{f} is archivable : {is_file_archivable(f, date)}")
+
+
