@@ -1,2 +1,8 @@
 Pillow
 pendulum
+s3fs
+ffmpeg-python
+python-magic
+bitwardentools
+packaging
+python-dotenv
