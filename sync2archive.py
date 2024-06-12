@@ -5,6 +5,7 @@ from PIL import Image, ExifTags, UnidentifiedImageError
 import s3fs
 import ffmpeg
 import magic
+import shutil
 
 from dotenv import dotenv_values
 
@@ -33,6 +34,12 @@ def count_moved_files(folder_name):
         nb_moved_files[folder_name] += 1
     else:
         nb_moved_files[folder_name] = 1
+
+def file_exists_on_s3(file_path):
+    try:
+        return s3.exists(Path("photo-archive", folder_name, f.name))
+    except OSError:
+        return False    
 
 parser = ArgumentParser(prog='Sync2Archive',
                         description='',
@@ -91,11 +98,11 @@ for idx, f in enumerate(files):
             s3.put_file(Path(f), Path("photo-archive", folder_name, f.name))
             pass
 
-        if s3.exists(Path("photo-archive", folder_name, f.name)):
+        if not args.force or file_exists_on_s3(Path("photo-archive", folder_name, f.name)):
             print(f"Move {f} to {archive_path}")
             if args.force:
                 archive_folder.mkdir(parents = True, exist_ok=True)
-                f.rename(archive_path)
+                shutil.move(f, archive_path)
 
 for folder, nb in nb_moved_files.items():
     print(f"Moved {nb} files to {folder}")
